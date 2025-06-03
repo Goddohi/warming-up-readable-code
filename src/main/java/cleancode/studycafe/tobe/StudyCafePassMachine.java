@@ -31,24 +31,11 @@ public class StudyCafePassMachine {
             outputHandler.showPassListForSelection(typePasses);
             StudyCafePass selectedPass = inputHandler.getSelectPass(typePasses);
 
+            StudyCafeLockerPass lockerPass =null;
             if (studyCafePassType == StudyCafePassType.FIXED) {
-
-                StudyCafeLockerPass lockerPass = getStudyCafeLockerPass(selectedPass);
-
-                boolean lockerSelection = false;
-                if (lockerPass != null) {
-                    outputHandler.askLockerPass(lockerPass);
-                    lockerSelection = inputHandler.getLockerSelection();
-                    if (lockerSelection) {
-                        outputHandler.showPassOrderSummary(selectedPass, lockerPass);
-                        return;
-                    }
-
-                }
-
+                 lockerPass = getStudyCafeLockerPass(selectedPass);
             }
-
-            outputHandler.showPassOrderSummary(selectedPass, null);
+            outputHandler.showPassOrderSummary(selectedPass, lockerPass);
         } catch (AppException e) {
             outputHandler.showSimpleMessage(e.getMessage());
         } catch (Exception e) {
@@ -65,7 +52,16 @@ public class StudyCafePassMachine {
             )
             .findFirst()
             .orElse(null);
-        return lockerPass;
+
+        if (lockerPass != null) {
+            outputHandler.askLockerPass(lockerPass);
+            boolean islockerSelected = inputHandler.getLockerSelection();
+            if (islockerSelected) {
+                return lockerPass;
+            }
+        }
+
+        return null;
     }
 
 }
