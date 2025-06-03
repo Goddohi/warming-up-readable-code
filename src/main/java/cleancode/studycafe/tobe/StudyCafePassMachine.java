@@ -9,6 +9,7 @@ import cleancode.studycafe.tobe.model.StudyCafePass;
 import cleancode.studycafe.tobe.model.StudyCafePassType;
 
 import java.util.List;
+import java.util.Optional;
 
 public class StudyCafePassMachine {
 
@@ -22,9 +23,10 @@ public class StudyCafePassMachine {
 
             StudyCafePass selectedPass = getStudyCafePass();
 
-            StudyCafeLockerPass lockerPass = getStudyCafeLockerPass(selectedPass);
-
-            outputHandler.showPassOrderSummary(selectedPass, lockerPass);
+            Optional<StudyCafeLockerPass> optionalLockerPass = getStudyCafeLockerPass(selectedPass);
+            optionalLockerPass.ifPresentOrElse(
+                    lockerPass -> outputHandler.showPassOrderSummary(selectedPass, lockerPass),
+                    ()->outputHandler.showPassOrderSummary(selectedPass));
         } catch (AppException e) {
             outputHandler.showSimpleMessage(e.getMessage());
         } catch (Exception e) {
@@ -35,19 +37,24 @@ public class StudyCafePassMachine {
     private StudyCafePass getStudyCafePass() {
         StudyCafePassType studyCafePassType = inputHandler.getPassTypeSelectingUserAction();
 
-        List<StudyCafePass> studyCafePasses = studyCafeFileHandler.readStudyCafePasses();
-
-        List<StudyCafePass> typePasses = studyCafePasses.stream()
-                .filter(studyCafePass -> studyCafePass.getPassType() == studyCafePassType)
-                .toList();
+        List<StudyCafePass> typePasses = getTypePasses(studyCafePassType);
 
         outputHandler.showPassListForSelection(typePasses);
         StudyCafePass selectedPass = inputHandler.getSelectPass(typePasses);
         return selectedPass;
     }
 
-    private StudyCafeLockerPass getStudyCafeLockerPass(StudyCafePass selectedPass) {
-        if (selectedPass.getPassType() != StudyCafePassType.FIXED) return null;
+    private List<StudyCafePass> getTypePasses(StudyCafePassType studyCafePassType) {
+        List<StudyCafePass> studyCafePasses = studyCafeFileHandler.readStudyCafePasses();
+
+        List<StudyCafePass> typePasses = studyCafePasses.stream()
+                .filter(studyCafePass -> studyCafePass.getPassType() == studyCafePassType)
+                .toList();
+        return typePasses;
+    }
+
+    private Optional<StudyCafeLockerPass> getStudyCafeLockerPass(StudyCafePass selectedPass) {
+        if (selectedPass.getPassType() != StudyCafePassType.FIXED) return Optional.empty();
 
         List<StudyCafeLockerPass> lockerPasses = studyCafeFileHandler.readLockerPasses();
         StudyCafeLockerPass lockerPass = lockerPasses.stream()
@@ -62,11 +69,11 @@ public class StudyCafePassMachine {
             outputHandler.askLockerPass(lockerPass);
             boolean islockerSelected = inputHandler.getLockerSelection();
             if (islockerSelected) {
-                return lockerPass;
+                return Optional.of(lockerPass);
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
 }
