@@ -31,10 +31,8 @@ public class StudyCafePassMachine {
             outputHandler.showPassListForSelection(typePasses);
             StudyCafePass selectedPass = inputHandler.getSelectPass(typePasses);
 
-            StudyCafeLockerPass lockerPass =null;
-            if (studyCafePassType == StudyCafePassType.FIXED) {
-                 lockerPass = getStudyCafeLockerPass(selectedPass);
-            }
+            StudyCafeLockerPass lockerPass = getStudyCafeLockerPass(selectedPass);
+
             outputHandler.showPassOrderSummary(selectedPass, lockerPass);
         } catch (AppException e) {
             outputHandler.showSimpleMessage(e.getMessage());
@@ -44,6 +42,8 @@ public class StudyCafePassMachine {
     }
 
     private StudyCafeLockerPass getStudyCafeLockerPass(StudyCafePass selectedPass) {
+        if (selectedPass.getPassType() != StudyCafePassType.FIXED) return null;
+
         List<StudyCafeLockerPass> lockerPasses = studyCafeFileHandler.readLockerPasses();
         StudyCafeLockerPass lockerPass = lockerPasses.stream()
             .filter(option ->
