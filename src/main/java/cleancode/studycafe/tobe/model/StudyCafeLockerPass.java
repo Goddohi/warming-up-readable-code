@@ -1,6 +1,8 @@
 package cleancode.studycafe.tobe.model;
 
-public class StudyCafeLockerPass {
+import java.io.Serializable;
+
+public class StudyCafeLockerPass implements Pass{
 
     private final StudyCafePassType passType;
     private final int duration;

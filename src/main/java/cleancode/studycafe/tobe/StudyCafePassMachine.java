@@ -40,35 +40,33 @@ public class StudyCafePassMachine {
         List<StudyCafePass> typePasses = getTypePasses(studyCafePassType);
 
         outputHandler.showPassListForSelection(typePasses);
-        StudyCafePass selectedPass = inputHandler.getSelectPass(typePasses);
-        return selectedPass;
+        return inputHandler.getSelectPass(typePasses);
     }
 
     private List<StudyCafePass> getTypePasses(StudyCafePassType studyCafePassType) {
         List<StudyCafePass> studyCafePasses = studyCafeFileHandler.readStudyCafePasses();
 
         List<StudyCafePass> typePasses = studyCafePasses.stream()
-                .filter(studyCafePass -> studyCafePass.getPassType() == studyCafePassType)
+                .filter(studyCafePass -> studyCafePass.isSamePassType(studyCafePassType))
                 .toList();
         return typePasses;
     }
 
     private Optional<StudyCafeLockerPass> getStudyCafeLockerPass(StudyCafePass selectedPass) {
-        if (selectedPass.getPassType() != StudyCafePassType.FIXED) return Optional.empty();
+        if (selectedPass.cannotUseLocker()) return Optional.empty();
 
         List<StudyCafeLockerPass> lockerPasses = studyCafeFileHandler.readLockerPasses();
         StudyCafeLockerPass lockerPass = lockerPasses.stream()
             .filter(option ->
-                option.getPassType() == selectedPass.getPassType()
-                    && option.getDuration() == selectedPass.getDuration()
+                selectedPass.isSamePassType(option) && selectedPass.isSameDuration(option)
             )
             .findFirst()
             .orElse(null);
 
         if (lockerPass != null) {
             outputHandler.askLockerPass(lockerPass);
-            boolean islockerSelected = inputHandler.getLockerSelection();
-            if (islockerSelected) {
+            boolean isLockerSelected = inputHandler.getLockerSelection();
+            if (isLockerSelected) {
                 return Optional.of(lockerPass);
             }
         }

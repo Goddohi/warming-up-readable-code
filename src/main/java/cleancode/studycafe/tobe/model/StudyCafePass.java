@@ -1,6 +1,6 @@
 package cleancode.studycafe.tobe.model;
 
-public class StudyCafePass {
+public class StudyCafePass implements Pass{
 
     private final StudyCafePassType passType;
     private final int duration;
@@ -35,16 +35,35 @@ public class StudyCafePass {
     }
 
     public String display() {
-        if (passType == StudyCafePassType.HOURLY) {
-            return String.format("%s시간권 - %d원", duration, price);
-        }
-        if (passType == StudyCafePassType.WEEKLY) {
-            return String.format("%s주권 - %d원", duration, price);
-        }
-        if (passType == StudyCafePassType.FIXED) {
-            return String.format("%s주권 - %d원", duration, price);
-        }
-        return "";
+        return passType.formatDisplay(duration, price);
     }
+
+    public boolean isSamePassType(StudyCafePassType passType) {
+        return this.passType == passType;
+    }
+
+    public boolean isSamePassType(Pass pass) {
+        return this.isSamePassType(pass.getPassType());
+    }
+
+    public boolean isNotSamePassType(StudyCafePassType passType) {
+        return this.passType != passType;
+    }
+
+    public boolean isSameDuration(int duration) {
+        return this.duration == duration;
+    }
+
+    public boolean isSameDuration(Pass pass) {
+        return this.isSameDuration(pass.getDuration());
+    }
+    public boolean canUseLocker() {
+        return passType.canUseLocker();
+    }
+    public boolean cannotUseLocker() {
+        return !canUseLocker();
+    }
+
+
 
 }
